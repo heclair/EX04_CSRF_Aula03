@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(to right, #9e1511, #c23616);
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-container {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .login-container h1 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #9e1511;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 1rem;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 0.6rem;
+        margin-top: 0.3rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 1.5rem;
+        background-color: #9e1511;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #7a100d;
+      }
+
+      #status {
+        text-align: center;
+        margin-top: 1rem;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Login</h1>
+      <form id="login-form">
+        <label for="username">Usuário:</label>
+        <input type="text" id="username" name="username" required />
+
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" required />
+
+        <button type="submit">Entrar</button>
+      </form>
+      <p id="status"></p>
+    </div>
+
+    <script>
+      const form = document.getElementById("login-form");
+      const status = document.getElementById("status");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        try {
+          const response = await fetch("http://localhost:3001/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: "include", // Incluindo os cookies
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // ✅ Redireciona para /home se o login for bem-sucedido
+            window.location.href = "/home";
+          } else {
+            status.textContent = data.error || "Erro ao fazer login.";
+            status.style.color = "red";
+          }
+        } catch (err) {
+          status.textContent = `Falha na requisição: ${err.message}`;
+          status.style.color = "red";
+        }
+      });
+    </script>
+  </body>
+</html>
