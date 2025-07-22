@@ -1,22 +1,34 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
+
 import dotenv from "dotenv";
 import path from "path";
 
-// Carrega as variáveis de ambiente definidas no arquivo .env
+// Carrega as variáveis de ambiente do .env
 dotenv.config();
 
-// Inicializa a aplicação Express
+// Inicializa o app
 const app = express();
+const PORT = process.env.PORT || 3002;
 
-// Define a porta utilizada pelo servidor
-const PORT = process.env.PORT || 3000;
+// Diretório de arquivos públicos
+const publicPath = path.join(__dirname, "..", "public");
 
-// Inicializa o servidor na porta definida
-app.listen(PORT, function () {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+// Middleware para servir arquivos estáticos (favicon, imagens etc.)
+app.use(express.static(publicPath));
+
+// Middleware para ignorar acessos automáticos indesejados
+app.use((req: Request, res: Response, next: NextFunction): void => {
+  const ignoredPaths = ["/favicon.ico", "/.well-known/appspecific/com.chrome.devtools.json"];
+  
+  if (ignoredPaths.includes(req.path)) {
+    res.status(204).end(); // simplesmente finaliza, sem retorno
+    return;
+  }
+
+  next();
 });
 
-// ****** ROTA INICIAL (http://localhost:3002) ******
+// ****** Página inicial ******
 app.get("/", (_: Request, res: Response) => {
   console.log("[SERVER-ATAQUE] Acessando página inicial com os exemplos de ataque.");
   res.send(`
@@ -29,25 +41,29 @@ app.get("/", (_: Request, res: Response) => {
   `);
 });
 
-// ****** ROTAS PARA PÁGINAS HTML ESTÁTICAS ******
+// ****** Rotas para páginas HTML específicas ******
 app.get("/csrf-get-attack", (_: Request, res: Response) => {
   console.log("[SERVER-ATAQUE] Página de ataque GET acessada.");
-  res.sendFile(path.join(__dirname, "..", "public", "csrf-get-attack.html"));
+  res.sendFile(path.join(publicPath, "csrf-get-attack.html"));
 });
 
 app.get("/csrf-post-attack", (_: Request, res: Response) => {
   console.log("[SERVER-ATAQUE] Página de ataque POST inseguro acessada.");
-  res.sendFile(path.join(__dirname, "..", "public", "csrf-post-attack.html"));
+  res.sendFile(path.join(publicPath, "csrf-post-attack.html"));
 });
 
 app.get("/csrf-post-attack-seguro", (_: Request, res: Response) => {
   console.log("[SERVER-ATAQUE] Página de ataque POST seguro (com simulação de proteção) acessada.");
-  res.sendFile(path.join(__dirname, "..", "public", "csrf-post-attack-seguro.html"));
+  res.sendFile(path.join(publicPath, "csrf-post-attack-seguro.html"));
 });
 
-// ****** ROTA 404 PADRÃO ******
-app.use(function (req: Request, res: Response) {
+// ****** Rota 404 padrão ******
+app.use((req: Request, res: Response) => {
   console.log(`[SERVER-ATAQUE] ❌ Rota inválida acessada: ${req.method} ${req.url}`);
-  console.log(`[SERVER-ATAQUE] Esta rota não está implementada. Redirecione para '/' ou páginas de teste específicas.`);
   res.status(404).json({ error: "Rota não encontrada" });
+});
+
+// Inicializa o servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });

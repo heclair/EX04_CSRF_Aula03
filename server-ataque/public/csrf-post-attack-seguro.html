@@ -2,18 +2,22 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Ataque CSRF</title>
+    <title>Ataque CSRF Protegido</title>
   </head>
   <body>
-    <h1>Voltar para a página inicial</h1>
+    <h1>Teste de ataque CSRF com proteção (espera-se FALHA)</h1>
 
+    <!--
+      Esse formulário tenta alterar a senha, mas será barrado pela verificação de ORIGIN
+      feita na rota /change-password-segura do servidor-vítima
+    -->
     <form action="http://localhost:3001/change-password-segura" method="POST">
       <input type="hidden" name="password" value="nova12345" />
-      <button type="submit">Ir agora!</button>
+      <button type="submit">Tentar ataque</button>
     </form>
 
     <script>
-      // Envia automaticamente o formulário
+      // Envia automaticamente o formulário ao carregar a página (simula ataque automatizado)
       document.forms[0].submit();
     </script>
   </body>

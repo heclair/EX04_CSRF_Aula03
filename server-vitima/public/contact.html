@@ -27,12 +27,25 @@
       const name = document.getElementById("name").value;
       const phone = document.getElementById("phone").value;
 
-      const res = await fetch(`/contact?name=${name}&phone=${phone}`, {
-        credentials: "include"
-      });
+      try {
+        const res = await fetch("/contact", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // importante para enviar o cookie do login
+          body: JSON.stringify({ name, phone }),
+        });
 
-      const data = await res.json();
-      status.textContent = data.message || data.error;
+        const data = await res.json();
+        status.textContent = data.message || data.error;
+        status.style.color = res.ok ? "green" : "red";
+
+      } catch (err) {
+        status.textContent = "Erro ao registrar contato.";
+        status.style.color = "red";
+        console.error("[CLIENT] Erro:", err);
+      }
     });
   </script>
 </body>
